@@ -1,0 +1,43 @@
+export const skills=[
+    {
+        id:1,
+        name:'HTML',
+    },
+    {
+        id:2,
+        name:'CSS',
+    },
+    {
+        id:3,
+        name:'JavaScript',
+    },
+    {
+        id:4,
+        name:'React',
+    },
+    {
+        id:5,
+        name:'React Native',
+    },
+    {
+        id:6,
+        name:'Node.js',
+    },
+    {
+        id:7,
+        name:'Express.js',
+    },
+    {
+        id:8,
+        name:'MongoDB',
+    },
+    {
+        id:9,
+        name:'Firebase',
+    },
+    {
+        id:10,
+        name:'Python',
+    },
+    
+]
