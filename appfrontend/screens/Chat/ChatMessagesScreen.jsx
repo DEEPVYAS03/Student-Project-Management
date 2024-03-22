@@ -39,6 +39,7 @@ const ChatMessagesScreen = () => {
       const data = await response.data;
       console.log('Messages:', data);
       setMessages(data);
+      
 
     } catch (error) {
       console.log('Error in fetching the messages:', error);
