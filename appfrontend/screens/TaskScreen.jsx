@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Modal,
   View,
@@ -8,27 +8,83 @@ import {
   Button,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import PastTask from './PastTask';
-import DropDownPicker from 'react-native-dropdown-picker';
+
+import SelectBox from 'react-native-multi-selectbox';
+import {xorBy} from 'lodash';
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function TaskTabs() {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator tabBarOptions={{
+      indicatorStyle: { backgroundColor: '#3366ff' }
+    }}>
       <Tab.Screen name="Upcoming" component={TaskScreen} />
       <Tab.Screen name="Past due" component={PastTask} />
     </Tab.Navigator>
   );
 }
 
+const K_OPTIONS = [
+  {
+    item: 'Juventus',
+    id: 'JUVE',
+  },
+  {
+    item: 'Real Madrid',
+    id: 'RM',
+  },
+  {
+    item: 'Barcelona',
+    id: 'BR',
+  },
+  {
+    item: 'PSG',
+    id: 'PSG',
+  },
+  {
+    item: 'FC Bayern Munich',
+    id: 'FBM',
+  },
+  {
+    item: 'Manchester United FC',
+    id: 'MUN',
+  },
+  {
+    item: 'Manchester City FC',
+    id: 'MCI',
+  },
+  {
+    item: 'Everton FC',
+    id: 'EVE',
+  },
+  {
+    item: 'Tottenham Hotspur FC',
+    id: 'TOT',
+  },
+  {
+    item: 'Chelsea FC',
+    id: 'CHE',
+  },
+  {
+    item: 'Liverpool FC',
+    id: 'LIV',
+  },
+  {
+    item: 'Arsenal FC',
+    id: 'ARS',
+  },
+
+  {
+    item: 'Leicester City FC',
+    id: 'LEI',
+  },
+];
+
 function TaskScreen() {
-  const items=[
-    { label: 'User 1', value: 'user1' },
-    { label: 'User 2', value: 'user2' },
-    { label: 'User 3', value: 'user3' },
-  ];
+  const [selectedTeams, setSelectedTeams] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [deadline, setDeadline] = useState(new Date());
@@ -54,43 +110,25 @@ function TaskScreen() {
     }
   };
 
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <TouchableOpacity
-        onPress={() => setModalVisible(true)}
-        style={{ padding: 10, backgroundColor: 'blue', borderRadius: 5 }}>
-        <Text style={{ color: 'white', fontSize: 16 }}>Add Task</Text>
-      </TouchableOpacity>
 
+  function onMultiChange() {
+    return (item) => setSelectedTeams(xorBy(selectedTeams, [item], 'id'))
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-          }}>
-          <View
-            style={{
-              backgroundColor: 'white',
-              padding: 20,
-              borderRadius: 10,
-              width: '80%',
-              color: 'black',
-            }}>
-            <Text style={{ color: 'black', fontSize: 18, marginBottom: 10 }}>
-              Task Details
-            </Text>
-
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%', color: 'black' }}>
+            <Text style={{ color: 'black', fontSize: 18, marginBottom: 10 }}>Task Details</Text>
+  
             {/* TaskId */}
             <View>
-              <Text>TaskId:</Text>
+              <Text style={{ color: 'black' }}>TaskId:</Text>
               <TextInput
                 editable={false}
                 selectTextOnFocus={false}
@@ -98,22 +136,24 @@ function TaskScreen() {
                   marginBottom: 10,
                   borderColor: 'gray',
                   backgroundColor: '#d3d3d3',
+                  placeholderTextColor: 'black',
                   borderWidth: 1,
                   padding: 10,
-                  color: 'gray',
+                  color: 'black',
                   borderRadius: 5,
                 }}
                 placeholder={taskId.toString()}
               />
             </View>
-
+  
             {/* Task Name */}
             <View>
-              <Text>Task Name:</Text>
+              <Text style={{ color: 'black' }}>Task Name:</Text>
               <TextInput
                 style={{
                   marginBottom: 10,
                   borderColor: 'gray',
+                  placeholderTextColor: 'black',
                   borderWidth: 1,
                   padding: 10,
                   color: 'black',
@@ -124,16 +164,17 @@ function TaskScreen() {
                 onChangeText={text => setTitle(text)}
               />
             </View>
-
+  
             {/* Date */}
             <View>
-              <Text>Select Date:</Text>
+              <Text style={{ color: 'black' }}>Select Date:</Text>
               <TouchableOpacity onPress={openDatePicker}>
                 <TextInput
                   style={{
                     marginBottom: 10,
                     color: 'black',
                     borderColor: 'gray',
+                    placeholderTextColor: 'gray',
                     borderWidth: 1,
                     padding: 10,
                     borderRadius: 5,
@@ -145,7 +186,7 @@ function TaskScreen() {
                 />
               </TouchableOpacity>
             </View>
-
+  
             {showDatePicker && (
               <DateTimePickerModal
                 isVisible={showDatePicker}
@@ -155,29 +196,46 @@ function TaskScreen() {
                 onCancel={() => setShowDatePicker(false)}
               />
             )}
-
+  
             {/* Assigned To */}
             <View>
-              <Text>Assign To:</Text>
-              <DropDownPicker
-                items={items}
-                defaultValue='user1'
-                multiple={true}
-                min={0}
-                max={3}
-                placeholder="Select users"
-                containerStyle={{ height: 40 }}
-                onChangeItem={items => setAssignedTo(items.map(item => item.value))}
+              <SelectBox
+                label="Assign To:"
+                labelStyle={{ color: 'black' }}
+                options={K_OPTIONS}
+                selectedValues={selectedTeams}
+                onMultiSelect={onMultiChange()}
+                onTapClose={onMultiChange()}
+                isMulti
+                arrowIconColor="#3366ff"
+                searchIconColor="#3366ff"
+                toggleIconColor="#3366ff"
+                multiOptionsLabelStyle={{ color: 'white' }}
+                multiOptionContainerStyle={{ backgroundColor: '#3366ff' }}
               />
             </View>
-
+  
             <View style={{ marginTop: 20, flexDirection: 'row', justifyContent: 'space-between' }}>
               <Button title="Save" onPress={handleSave} />
-              <Button title="Cancel" onPress={() => setModalVisible(false)} />
+              <Button  title="Cancel" onPress={() => setModalVisible(false)} />
             </View>
           </View>
         </View>
       </Modal>
+  
+      <View style={{ position: 'absolute', bottom: 20, left: 0, right: 0, paddingHorizontal: 20 }}>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={{
+            backgroundColor: '#3366ff',
+            borderRadius: 20,
+            paddingVertical: 15,
+            alignItems: 'center',
+          }}>
+          <Text style={{ color: 'white', fontSize: 16 }}>Add Task</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
+  
 }
