@@ -4,7 +4,7 @@ const router = express.Router();
 // importing controllers
 
 // importing user controller
-const {createUser,loginUser, getAllUsers, sendFriendRequest, getAllRequest, acceptFriendRequest, getAllFriends} =require('../controllers/Usercontroller')
+const {createUser,loginUser, getAllUsers, sendFriendRequest, getAllRequest, acceptFriendRequest, getAllFriends,fetchUser} =require('../controllers/Usercontroller')
 
 
 
@@ -34,6 +34,8 @@ router.post('/accept-friend-request', acceptFriendRequest);
 // get all friends
 router.get('/get-all-friends/:userId', getAllFriends);
 
+// get User
+router.get('/user/:userId',fetchUser)
 
 // exporting routes as single router
 module.exports = router;

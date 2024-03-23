@@ -98,7 +98,7 @@ const sendFriendRequest = async (req, res) => {
 }
 
 
-
+ 
 const getAllRequest = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -111,6 +111,21 @@ const getAllRequest = async (req, res) => {
         console.log('Friend:', friend);
         res.status(200).json({ friend });
 
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+
+const fetchUser = async (req, res) => {
+    try {
+        const userId = req.params.userId
+        const stringId = userId.toString();
+        const user = await User.findById(stringId);
+        console.log('User:', user);
+        res.status(200).json({ _id:stringId,name: user.name ,email: user.email });
     }
     catch (err) {
         console.log(err);
@@ -162,4 +177,4 @@ const getAllFriends = async (req, res) => {
 }
 
 // export both controllers individually to use in routes
-module.exports = { createUser, loginUser, getAllUsers , sendFriendRequest ,getAllRequest ,acceptFriendRequest , getAllFriends}
+module.exports = { createUser, loginUser,fetchUser, getAllUsers , sendFriendRequest ,getAllRequest ,acceptFriendRequest , getAllFriends}

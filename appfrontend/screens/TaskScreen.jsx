@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Modal,
   View,
@@ -10,9 +10,11 @@ import {
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import PastTask from './PastTask';
-
+import ipconstant from '../ipconstant/ipconstant';
 import SelectBox from 'react-native-multi-selectbox';
 import {xorBy} from 'lodash';
+import { useUser } from '../context/allContext';
+import axios from 'axios';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -91,6 +93,38 @@ function TaskScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [assignedTo, setAssignedTo] = useState([]);
   const [taskId, setTaskId] = useState(1);
+  const [users, setUsers] = useState([]);
+  const {userId} =useUser()
+
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+     
+     const response = await axios.get(`${ipconstant}/api/get-all-friends/${userId}`)
+    console.log('Response:', response.data);
+     const fetchedFriends = response.data.friends;
+     const sameUser = await axios.get(`${ipconstant}/api/user/${userId}`)
+     console.log('Same User:', sameUser.data);
+      const currentUser = sameUser.data;
+      const allUsers =[currentUser, ...fetchedFriends]
+      
+
+      setUsers(allUsers);
+
+      console.log('Users:', allUsers);
+
+
+
+    }
+    catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
 
   const handleSave = () => {
     console.log('Task:', title);
@@ -117,6 +151,9 @@ function TaskScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+
+
+      {/* Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -153,7 +190,7 @@ function TaskScreen() {
                 style={{
                   marginBottom: 10,
                   borderColor: 'gray',
-                  placeholderTextColor: 'black',
+                  placeholderTextColor:'gray',
                   borderWidth: 1,
                   padding: 10,
                   color: 'black',
@@ -222,7 +259,8 @@ function TaskScreen() {
           </View>
         </View>
       </Modal>
-  
+              
+      {/* Add task button */}
       <View style={{ position: 'absolute', bottom: 20, left: 0, right: 0, paddingHorizontal: 20 }}>
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
@@ -235,6 +273,8 @@ function TaskScreen() {
           <Text style={{ color: 'white', fontSize: 16 }}>Add Task</Text>
         </TouchableOpacity>
       </View>
+
+
     </View>
   );
   
