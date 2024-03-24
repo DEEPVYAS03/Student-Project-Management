@@ -4,11 +4,11 @@ const express = require('express');
 const router = express.Router();
 
 
-const {setAssignedUser,gettingAssignedTask, updatingTaskStatus} = require('../controllers/TaskController')
+const {gettingAssignedTask, updatingTaskStatus, setUserTasks} = require('../controllers/TaskController')
 
 // Setting the user data who assigned the task
 
-router.post('/assignedby',setAssignedUser)
+router.post('/savetask',setUserTasks)
 
 // showing the task to user 
 

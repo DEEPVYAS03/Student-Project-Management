@@ -13,6 +13,8 @@ const userRoutes = require('./routes/UserRoutes')
 
 const messageRoutes = require('./routes/messageRoutes')
 
+const taskRoutes = require('./routes/TaskRoutes')
+
 
 // middlewares
 app.use(cors())
@@ -24,6 +26,7 @@ app.use(express.json())
 //userRouter
 app.use('/api',userRoutes)
 app.use('/api',messageRoutes)
+app.use('/api',taskRoutes)
 
 
 

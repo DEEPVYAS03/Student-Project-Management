@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema({
         unique: true
     },
     password:{
-      required:true,
+        required:true,
         type: String
     },
     college:{
@@ -21,58 +21,54 @@ const UserSchema = new mongoose.Schema({
         type: Array
     },
     friendRequests: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
     ],
     friends: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
     ],
     sentFriendRequests: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
     ],
 
     tasks: [{
-      id:{
-        type:String,
-        
-      },
-      title: {
-          type: String,
-          
-      },
-      description: {
-          type: String
-      },
-      deadline: {
-          type: Date,
-      },
-      assignedTo: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User"
-      },
-      assignedBy:{
-          type: mongoose.Schema.Types.ObjectId,
-          ref:"User"
-      },
-      acceptAssign:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
-      },
-      completed: {
-          type: Boolean,
-          default: false
-      }
-  }]
-
-
+        taskId:{
+            type:String,
+        },
+        title: {
+            type: String,
+        },
+        description: {
+            type: String
+        },
+        deadline: {
+            type: Date,
+        },
+        assignedTo: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }],
+        assignedBy:[{
+            type: mongoose.Schema.Types.ObjectId,
+            ref:"User"
+        }],
+        acceptAssign:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"User"
+        },
+        completed: {
+            type: Boolean,
+            default: false
+        }
+    }]
 })
 
 module.exports = mongoose.model('User',UserSchema)

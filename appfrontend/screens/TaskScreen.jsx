@@ -29,64 +29,9 @@ export default function TaskTabs() {
   );
 }
 
-const K_OPTIONS = [
-  {
-    item: 'Juventus',
-    id: 'JUVE',
-  },
-  {
-    item: 'Real Madrid',
-    id: 'RM',
-  },
-  {
-    item: 'Barcelona',
-    id: 'BR',
-  },
-  {
-    item: 'PSG',
-    id: 'PSG',
-  },
-  {
-    item: 'FC Bayern Munich',
-    id: 'FBM',
-  },
-  {
-    item: 'Manchester United FC',
-    id: 'MUN',
-  },
-  {
-    item: 'Manchester City FC',
-    id: 'MCI',
-  },
-  {
-    item: 'Everton FC',
-    id: 'EVE',
-  },
-  {
-    item: 'Tottenham Hotspur FC',
-    id: 'TOT',
-  },
-  {
-    item: 'Chelsea FC',
-    id: 'CHE',
-  },
-  {
-    item: 'Liverpool FC',
-    id: 'LIV',
-  },
-  {
-    item: 'Arsenal FC',
-    id: 'ARS',
-  },
-
-  {
-    item: 'Leicester City FC',
-    id: 'LEI',
-  },
-];
 
 function TaskScreen() {
-  const [selectedTeams, setSelectedTeams] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [deadline, setDeadline] = useState(new Date());
@@ -126,12 +71,34 @@ function TaskScreen() {
   };
 
 
-  const handleSave = () => {
-    console.log('Task:', title);
-    console.log('Assigned To:', assignedTo);
-    console.log('Deadline:', deadline.toISOString().split('T')[0]);
-    setModalVisible(false);
+  const handleSave = async () => {
+    try {
+      // Construct payload
+      const payload = {
+        userId: userId,
+        taskId: taskId,
+        title: title,
+        deadline: deadline.toISOString().split('T')[0],
+        assignedTo: selectedUsers.map(user => user.id)
+      };
+
+      console.log('Payload:', payload);
+  
+      // Send data to backend
+      const response = await axios.post(`${ipconstant}/api/savetask`, payload);
+  
+      console.log('Task saved successfully:', response.data);
+      
+      // Close modal after saving
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Error saving task:', error);
+    }
   };
+
+  
+
+  
 
   const openDatePicker = () => {
     setShowDatePicker(true);
@@ -146,8 +113,27 @@ function TaskScreen() {
 
 
   function onMultiChange() {
-    return (item) => setSelectedTeams(xorBy(selectedTeams, [item], 'id'))
+    return (item) => {
+      // Check if the selected item is already in the selectedUsers array
+      const isSelected = selectedUsers.some(user => user.id === item.id);
+      if (isSelected) {
+        // If selected, remove it from the assignedTo array
+        const updatedAssignedTo = assignedTo.filter(userId => userId !== item.id);
+        setAssignedTo(updatedAssignedTo);
+      } else {
+        // If not selected, add it to the assignedTo array
+        const updatedAssignedTo = [...assignedTo, item.id];
+        setAssignedTo(updatedAssignedTo);
+      }
+  
+      // Toggle selection in selectedUsers array
+      const updatedSelectedUsers = isSelected
+        ? selectedUsers.filter(user => user.id !== item.id)
+        : [...selectedUsers, item];
+      setSelectedUsers(updatedSelectedUsers);
+    };
   }
+  
 
   return (
     <View style={{ flex: 1 }}>
@@ -239,8 +225,8 @@ function TaskScreen() {
               <SelectBox
                 label="Assign To:"
                 labelStyle={{ color: 'black' }}
-                options={K_OPTIONS}
-                selectedValues={selectedTeams}
+                options={users.map(user => ({ item: user.name, id: user._id }))}
+                selectedValues={selectedUsers}
                 onMultiSelect={onMultiChange()}
                 onTapClose={onMultiChange()}
                 isMulti
