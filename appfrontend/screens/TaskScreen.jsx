@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   Button,
+  ScrollView,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
@@ -15,6 +16,7 @@ import SelectBox from 'react-native-multi-selectbox';
 import {xorBy} from 'lodash';
 import { useUser } from '../context/allContext';
 import axios from 'axios';
+import tw from 'twrnc'
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -246,6 +248,22 @@ function TaskScreen() {
         </View>
       </Modal>
               
+      {/* Actual screen */}
+
+      <ScrollView style={tw`ml-4`}>
+      {/* Welcome */}
+      <View style={tw`mt-5 flex-row items-center`}>
+              <Text style={tw`text-black text-lg font-semibold mt-1`}>Here are your assigned tasks,</Text>
+              <Text style={tw`ml-1 font-extrabold text-xl text-black `}>Preksha!</Text>
+      </View>
+
+      <View style={tw`mt-3`}>
+            <Text style={tw`text-black`}>Task assigned by Others:</Text>
+      </View>
+
+      </ScrollView>
+
+
       {/* Add task button */}
       <View style={{ position: 'absolute', bottom: 20, left: 0, right: 0, paddingHorizontal: 20 }}>
         <TouchableOpacity
