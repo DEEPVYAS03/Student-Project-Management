@@ -17,6 +17,7 @@ import {xorBy} from 'lodash';
 import {useUser} from '../context/allContext';
 import axios from 'axios';
 import tw from 'twrnc';
+import {set} from 'mongoose';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -48,10 +49,8 @@ function TaskScreen() {
 
   useEffect(() => {
     fetchUsers();
-    fetchTasks()
+    fetchTasks();
   }, []);
-
- 
 
   const fetchUsers = async () => {
     try {
@@ -92,6 +91,7 @@ function TaskScreen() {
       console.log('Task saved successfully:', response.data);
 
       // Close modal after saving
+      setTaskId(taskId + 1);
       setModalVisible(false);
     } catch (error) {
       console.error('Error saving task:', error);
@@ -133,16 +133,36 @@ function TaskScreen() {
     };
   }
 
+  const onCompleteTask = async (taskId) => {
+    try {
+      // Send PUT request to mark task as completed
+      await axios.put(`${ipconstant}/api/updatingtask`, {userId, taskId});
+      // If successful, fetch tasks again to update UI
+      fetchTasks();
+    } catch (error) {
+      console.error('Error completing task:', error);
+    }
+  };
+
   const fetchTasks = async () => {
     try {
-      const response = await axios.get(`${ipconstant}/api/showingTask/${userId}`);
+      const response = await axios.get(
+        `${ipconstant}/api/showingTask/${userId}`,
+      );
       console.log('Tasks:', response.data);
-      setTaskUser(response.data.user)
+      setTaskUser(response.data.user);
       setTasks(response.data.assignedTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     }
-  }
+  };
+
+  // filters
+  const tasksAssignedByMe = tasks.filter(task => task.assignedBy.id === userId);
+  const tasksAssignedByOthers = tasks.filter(
+    task => task.assignedBy.id !== userId,
+  );
+  const completedTasks = tasks.filter(task => task.completed === true);
 
   return (
     <View style={{flex: 1}}>
@@ -286,56 +306,65 @@ function TaskScreen() {
           </Text>
         </View>
 
-        {/* Tasks assigned by others */}
-        <View style={tw`mt-3`}>
-          <Text style={tw`text-black`}>Task assigned by Others:</Text>
+        {/* Task assigned by me  */}
+        <View style={tw`mt-5`}>
+          <Text style={tw`text-black`}>Tasks Assigned by Me:</Text>
           <ScrollView style={tw`h-38 mt-3`}>
-
-            { tasks.map((task,index) => (
+            {tasksAssignedByMe.map((task, index) => (
               <View key={index} style={tw`mt-2`}>
-              <View
-                style={tw`bg-gray-200 p-2 rounded-md w-90 flex-row justify-between`}>
-                <View>
-                  <Text style={tw`text-black`}>{task.taskName}</Text>
-                  <Text style={tw`text-black`}>Deadline: {task.deadline}</Text>
-                  <Text style={tw`text-black`}>Assigned by: {task.assignedBy.name} </Text>
-                </View>
-                <View>
-                  <TouchableOpacity>
-                    <Text
-                      style={tw`mt-2 bg-blue-600 p-3 rounded-full text-white`}>
-                      Completed
+                <View
+                  style={tw`bg-gray-200 p-2 rounded-md w-90 flex-row justify-between`}>
+                  <View>
+                    <Text style={tw`text-black`}>{task.taskName}</Text>
+                    <Text style={tw`text-black`}>
+                      Deadline: {task.deadline}
                     </Text>
-                  </TouchableOpacity>
+                  </View>
+                  <View>
+                    {/* Button to mark task as completed */}
+                    <TouchableOpacity
+                      onPress={() => onCompleteTask(task.taskId)}>
+                      <Text
+                        style={tw`mt-2 bg-blue-600 p-3 rounded-full text-white`}>
+                        Completed
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
-            </View>
             ))}
           </ScrollView>
         </View>
 
-        {/* task assigned by you */}
+        {/* Tasks assigned by others */}
         <View style={tw`mt-5`}>
-          <Text style={tw`text-black`}>Task assigned by You:</Text>
+          <Text style={tw`text-black`}>Tasks Assigned by Others:</Text>
           <ScrollView style={tw`h-38 mt-3`}>
-            <View>
-              <View
-                style={tw`bg-gray-200 p-2 rounded-md w-90 flex-row justify-between`}>
-                <View>
-                  <Text style={tw`text-black`}>Task 1</Text>
-                  <Text style={tw`text-black`}>Deadline: 2021-08-05</Text>
-                  <Text style={tw`text-black`}>Assigned by: John Doe</Text>
-                </View>
-                <View>
-                  <TouchableOpacity>
-                    <Text
-                      style={tw`mt-2 bg-blue-600 p-3 rounded-full text-white`}>
-                      Completed
+            {tasksAssignedByOthers.map((task, index) => (
+              <View key={index} style={tw`mt-2`}>
+                <View
+                  style={tw`bg-gray-200 p-2 rounded-md w-90 flex-row justify-between`}>
+                  <View>
+                    <Text style={tw`text-black`}>{task.taskName}</Text>
+                    <Text style={tw`text-black`}>
+                      Deadline: {task.deadline}
                     </Text>
-                  </TouchableOpacity>
+                    <Text style={tw`text-black`}>
+                      Assigned by: {task.assignedBy.name}
+                    </Text>
+                  </View>
+                  <View>
+                    <TouchableOpacity
+                      onPress={() => onCompleteTask(task.taskId)}>
+                      <Text
+                        style={tw`mt-2 bg-blue-600 p-3 rounded-full text-white`}>
+                        Completed
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
-            </View>
+            ))}
           </ScrollView>
         </View>
 
@@ -343,13 +372,17 @@ function TaskScreen() {
         <View style={tw`mt-5`}>
           <Text style={tw`text-black`}>Completed Tasks:</Text>
           <ScrollView style={tw`h-38 mt-3`}>
-            <View style={tw`mt-2`}>
-              <View style={tw`bg-gray-200 p-2 rounded-md w-90`}>
-                <Text style={tw`text-black`}>Task 1</Text>
-                <Text style={tw`text-black`}>Deadline: 2021-08-05</Text>
-                <Text style={tw`text-black`}>Assigned by: John Doe</Text>
+            {completedTasks.map((task, index) => (
+              <View key={index} style={tw`mt-2`}>
+                <View style={tw`bg-gray-200 p-2 rounded-md w-90`}>
+                  <Text style={tw`text-black`}>{task.taskName}</Text>
+                  <Text style={tw`text-black`}>Deadline: {task.deadline}</Text>
+                  <Text style={tw`text-black`}>
+                    Assigned by: {task.assignedBy.name}
+                  </Text>
+                </View>
               </View>
-            </View>
+            ))}
           </ScrollView>
         </View>
       </View>

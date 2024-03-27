@@ -1,23 +1,17 @@
-const User = require('../models/User')
-const mongoose = require('mongoose')
-
+const User = require('../models/User');
+const mongoose = require('mongoose');
 
 const setUserTasks = async (req, res) => {
     const { userId, taskId, title, deadline, assignedTo } = req.body;
 
     try {
-       
         // Find the user who is assigning the task
         let assigningUser = await User.findById(userId);
-
-        // assigningUser before pushing
-        console.log('Assigning User:', assigningUser);
 
         // Loop through each assigned user ID
         for (const assignedUserId of assignedTo) {
             // Find the user to whom the task is assigned
             let assignedUser = await User.findById(assignedUserId);
-            console.log('Assigned User:', assignedUser);
 
             // Ensure tasks array is initialized
             if (!assignedUser.tasks) assignedUser.tasks = [];
@@ -50,10 +44,8 @@ const setUserTasks = async (req, res) => {
     }
 }
 
-
-
 const getUserTasks = async (req, res) => {
-    const { userId } = req.params; // Assuming userId is passed in the request parameters
+    const { userId } = req.params;
 
     try {
         // Find the user by ID and populate the tasks with assignedBy user details
@@ -75,31 +67,32 @@ const getUserTasks = async (req, res) => {
         // Iterate through user's tasks
         for (const task of user.tasks) {
             // If task is assigned by someone
-            if (task.assignedBy.length > 0) {
+            if (task.assignedBy) {
                 // Extract task details and assignedBy user details
                 assignedTasks.push({
+                    taskId: task.taskId,
                     taskName: task.title,
                     deadline: task.deadline.toISOString().split('T')[0],
                     completed: task.completed,
-                    assignedBy: task.assignedBy.map(assigner => ({
-                        id: assigner._id,
-                        name: assigner.name,
-                        email: assigner.email
-                    }))
+                    assignedBy: {
+                        id: task.assignedBy._id,
+                        name: task.assignedBy.name,
+                        email: task.assignedBy.email
+                    }
                 });
             }
         }
 
-        res.status(200).json({ user: {id:user._id ,name: user.name, email: user.email }, assignedTasks });
+        res.status(200).json({ user: { id: user._id, name: user.name, email: user.email }, assignedTasks });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
     }
-};
-
+}
 
 const markTaskAsCompleted = async (req, res) => {
     const { userId, taskId } = req.body;
+    console.log(userId, taskId);
 
     try {
         const user = await User.findById(userId);
@@ -126,9 +119,5 @@ const markTaskAsCompleted = async (req, res) => {
     }
 };
 
+
 module.exports = { setUserTasks, getUserTasks, markTaskAsCompleted };
-
-
-
-
-
