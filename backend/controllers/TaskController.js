@@ -79,8 +79,10 @@ const getUserTasks = async (req, res) => {
                 // Extract task details and assignedBy user details
                 assignedTasks.push({
                     taskName: task.title,
-                    deadline: task.deadline,
+                    deadline: task.deadline.toISOString().split('T')[0],
+                    completed: task.completed,
                     assignedBy: task.assignedBy.map(assigner => ({
+                        id: assigner._id,
                         name: assigner.name,
                         email: assigner.email
                     }))
@@ -88,7 +90,7 @@ const getUserTasks = async (req, res) => {
             }
         }
 
-        res.status(200).json({ user: { name: user.name, email: user.email }, assignedTasks });
+        res.status(200).json({ user: {id:user._id ,name: user.name, email: user.email }, assignedTasks });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
@@ -96,54 +98,37 @@ const getUserTasks = async (req, res) => {
 };
 
 
+const markTaskAsCompleted = async (req, res) => {
+    const { userId, taskId } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Find the task by taskId
+        const taskIndex = user.tasks.findIndex(task => task.taskId === taskId);
+        if (taskIndex === -1) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+
+        // Mark the task as completed
+        user.tasks[taskIndex].completed = true;
+
+        await user.save();
+
+        res.status(200).json({ message: "Task marked as completed successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+module.exports = { setUserTasks, getUserTasks, markTaskAsCompleted };
 
 
 
 
 
-
-// const gettingAssignedTask = async (req, res) => {
-//     const { userId } = req.body;
-
-//     try {
-//         const assignedUser =await User.findById(userId);
-//         console.log(assignedUser)
-//         res.status(200).json({ tasks: assignedUser.tasks });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: "Internal server error" });
-//     }
-// }
-
-
-// const updatingTaskStatus = async (req, res) => {
-//     const { userId, title } = req.body;
-
-//     try {
-//         // Fetch the user
-//         const assignedUser = await User.findById(userId);
-//         console.log(assignedUser);
-
-//         // Find the task by taskId in the user's tasks array+
-//         const taskToUpdate = assignedUser.tasks.find(task => task.title == title);
-
-//         // Update the task status to completed
-//         if (taskToUpdate) {
-//             taskToUpdate.completed = true;
-//             await assignedUser.save();
-//             // Send the updated user object in the response
-//             res.status(200).json({ message: "Task status updated successfully", user: assignedUser });
-//         } else {
-//             res.status(404).json({ message: "Task not found" });
-//         }
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: "Internal server error" });
-//     }
-// }
-
-
-
-
-
-module.exports = {setUserTasks ,getUserTasks}
