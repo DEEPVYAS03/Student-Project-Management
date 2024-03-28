@@ -93,6 +93,7 @@ function TaskScreen() {
       // Close modal after saving
       setTaskId(taskId + 1);
       setModalVisible(false);
+      fetchTasks();
     } catch (error) {
       console.error('Error saving task:', error);
     }
@@ -158,9 +159,9 @@ function TaskScreen() {
   };
 
   // filters
-  const tasksAssignedByMe = tasks.filter(task => task.assignedBy.id === userId);
+  const tasksAssignedByMe = tasks.filter(task => task.assignedBy.id === userId && task.completed === false);
   const tasksAssignedByOthers = tasks.filter(
-    task => task.assignedBy.id !== userId,
+    task => task.assignedBy.id !== userId && task.completed === false
   );
   const completedTasks = tasks.filter(task => task.completed === true);
 
@@ -391,7 +392,7 @@ function TaskScreen() {
       <View
         style={{
           position: 'absolute',
-          bottom: 20,
+          bottom: 10,
           left: 0,
           right: 0,
           paddingHorizontal: 20,
