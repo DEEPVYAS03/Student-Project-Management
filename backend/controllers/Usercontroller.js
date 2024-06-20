@@ -1,7 +1,6 @@
 const User = require('../models/User')
 const mongoose = require('mongoose')
-
-
+require('dotenv').config()
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -54,7 +53,7 @@ const loginUser = async (req, res) => {
             id: user._id
         }
     }
-    const jwtSecret = 'DEEPVYAS03';
+    const jwtSecret = process.env.JWT_SECRET;
     // signing using jwt secret key
     const authToken = jwt.sign(data, jwtSecret)
 

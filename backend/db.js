@@ -1,8 +1,10 @@
 const mongoose = require('mongoose')
+require('dotenv').config()
 
 const connectDB = async () => {
     try{
-        await mongoose.connect('mongodb+srv://DeepVyas:DeepVyas@hackhaven.hzl21hg.mongodb.net/HackHaven?retryWrites=true&w=majority&appName=HackHaven')
+        await mongoose.connect(process.env.MONGO_URI)
+        console.log('Connected to database')    
     }
     catch(err){
         console.log('Error:',err)
