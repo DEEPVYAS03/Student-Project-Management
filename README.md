@@ -43,6 +43,7 @@ This project is a comprehensive solution for enhanced project management, featur
     npm start
     ```
 
+## Screenshot
 
 ![project management](https://github.com/DEEPVYAS03/Student-Project-Management/assets/113181349/92f27fe0-e8f5-4532-a8a1-5f49a142d917)
 
